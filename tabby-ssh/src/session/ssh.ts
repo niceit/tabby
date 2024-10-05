@@ -218,6 +218,8 @@ export class SSHSession {
         const resultPromise: Promise<void> = new Promise(async (resolve, reject) => {
             ssh.on('ready', () => {
                 connected = true
+                // Fix SSH Lagging
+                ssh.setNoDelay(true)
                 if (this.savedPassword) {
                     this.passwordStorage.savePassword(this.profile, this.savedPassword)
                 }
@@ -331,6 +333,7 @@ export class SSHSession {
                 algorithms,
                 authHandler: (methodsLeft, partialSuccess, callback) => {
                     this.zone.run(async () => {
+                        await hostVerifiedPromise
                         callback(await this.handleAuth(methodsLeft))
                     })
                 },
